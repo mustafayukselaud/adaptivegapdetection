@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Adaptive Gap Detection Test</title>
+    <script src="js/tools.js"></script>
+    <script src="jspsych-6.3.1/jspsych.js"></script>
+    <script src="jspsych-6.3.1/jspsych-nafc-adaptive.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-html-button-response.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-audio-button-response.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-instructions.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-waitfor-function.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-survey-text.js"></script>  
+    <script src="jspsych-6.3.1/plugins/jspsych-audio-sequence-button-response.js"></script>
+    <script src="jspsych-6.3.1/jsQuery.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-preload.js"></script>
+    <link href="jspsych-6.3.1/css/jspsych.css" rel="stylesheet" type="text/css">
+    <style>
+    </style>
+  </head>
+  <body>
+  <script>
+    var timeline = []
+
+    //collecting participant ID
+    var codeName = {
+      type: 'survey-text',
+      questions: [
+        {prompt: 'Katılımcı İsmi / Kodu, Yaşı ve Cinsiyetini Girin (Ör. Mustafa37E)', name: 'isim', required: true},
+        ],
+      data: {
+      task_part: 'code_name'
+        }
+    };
+
+    //sound level screen
+    var sound_level = {
+        timeline: [{
+        type: 'audio-button-response',
+        stimulus: 'BroadbandNoise.wav',
+        choices: ['TEKRAR DİNLE', 'DEVAM'],
+        prompt: '<p>Lüfen cihazınızın ses seviyesini bu konuşmayı rahat bir şekilde duyabileceğiniz şekilde ayarlayın. \n'+
+        '<p><b>TEKRAR DİNLE</b> tuşuna basarak ses örneğini istediğiniz kadar dinleyebilirsiniz. Kendinizi hazır hissedince <b>DEVAM</b> tuşuna basın'
+         }],
+            loop_function: function(data){
+                if(jsPsych.pluginAPI.compareKeys(data.values()[0].response, 0)){
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+    };
+
+    //information
+    var wellcome = {
+        type: 'html-button-response',
+        choices: ['BAŞLAT'],
+        stimulus: '<b>Rastgele Gürültü Ayırt Etme</b> testine hoşgeldiniz.\n'+ 
+                '<p>Şimdiki testte bazı sesler duyacaksınız.\n'+
+                'Bu sesler tek veya çift olarak duyulabilir.\n'+
+                'Eğer tek bir ses duyduğunuzu düşünüyorsanız <b>TEK</b>.\n'+
+                'Çift ses duyduğunuzu düşünüyorsanız <b>ÇİFT</b> düğmesine basın.\n'+
+                '<p><b>BAŞLAT</b> düğmesine basarak alıştırmayı başlatabilirsiniz.'
+    };
+
+    //practice trials
+    var explanation1 = {
+        type: 'html-button-response',
+        choices: ['ÖRNEĞİ DİNLE'],
+        stimulus: 'Şimdi dinleyeceğiniz seslerde ikinci ses çift duyulacak.'
+    };
+    
+    var practice1 = {
+      type: 'audio-sequence-button-response',
+      prompt: `
+          <p>Bu örnekte ikinci ses <strong>ÇİFT</strong>.
+            `,
+      choices: ['1', '2'],
+      stimuli: ['audioNoiseNoise/n1.wav', 'audioNoiseNoise/n25.wav'],
+      trial_ends_after_audio: true,
+      button_html: '<button style="height:200px; width:200px; font-size:40px">%choice%</button>',
+      isi: 2000,
+    };
+
+    var explanation2 = {
+        type: 'html-button-response',
+        choices: ['ÖRNEĞİ DİNLE'],
+        stimulus: 'Şimdi dinleyeceğiniz seslerde ise birinci ses çift olacak.'
+    };  
+
+    var practice2 = {
+      type: 'audio-sequence-button-response',
+      prompt: `
+          <p>Bu örnekte ise birinci ses <strong>ÇİFT</strong>.
+            `,
+      choices: ['1', '2'],
+      stimuli: ['audioNoiseNoise/n35.wav', 'audioNoiseNoise/n1.wav'],
+      trial_ends_after_audio: true,
+      button_html: '<button style="height:200px; width:200px; font-size:40px">%choice%</button>',
+      isi: 2000,
+    };
+
+
+    function getRandomIntInclusive(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min) + min);
+    }
+
+    //stimuli with varying gap durations
+    var stimuli = [
+                    "audioNoiseNoise/n0.wav",                
+                    "audioNoiseNoise/n1.wav", 
+                    "audioNoiseNoise/n2.wav", 
+                    "audioNoiseNoise/n3.wav", 
+                    "audioNoiseNoise/n4.wav", 
+                    "audioNoiseNoise/n5.wav", 
+                    "audioNoiseNoise/n6.wav", 
+                    "audioNoiseNoise/n7.wav",
+                    "audioNoiseNoise/n8.wav",
+                    "audioNoiseNoise/n9.wav",
+                    "audioNoiseNoise/n10.wav",
+                    "audioNoiseNoise/n11.wav",
+                    "audioNoiseNoise/n12.wav",
+                    "audioNoiseNoise/n13.wav",
+                    "audioNoiseNoise/n14.wav",
+                    "audioNoiseNoise/n15.wav",
+                    "audioNoiseNoise/n16.wav",
+                    "audioNoiseNoise/n17.wav",
+                    "audioNoiseNoise/n18.wav",
+                    "audioNoiseNoise/n19.wav",
+                    "audioNoiseNoise/n20.wav",
+                    "audioNoiseNoise/n21.wav",
+                    "audioNoiseNoise/n22.wav",
+                    "audioNoiseNoise/n23.wav",
+                    "audioNoiseNoise/n24.wav",
+                    "audioNoiseNoise/n25.wav",
+                    "audioNoiseNoise/n26.wav",
+                    "audioNoiseNoise/n27.wav",
+                    "audioNoiseNoise/n28.wav",
+                    "audioNoiseNoise/n29.wav",
+                    "audioNoiseNoise/n30.wav",
+                    "audioNoiseNoise/n31.wav",
+                    "audioNoiseNoise/n32.wav",
+                    "audioNoiseNoise/n33.wav",
+                    "audioNoiseNoise/n34.wav",
+                    "audioNoiseNoise/n35.wav",
+                    "audioNoiseNoise/n36.wav",
+                    "audioNoiseNoise/n37.wav",
+                    "audioNoiseNoise/n38.wav",
+                    "audioNoiseNoise/n39.wav",
+                    "audioNoiseNoise/n40.wav"]
+
+    function show_error_nAFC(msg){
+        $('#jspsych-target').append("<div class='ui error message'>"+msg+"</div>");
+    }
+
+    function send_nAFC_data(options, condition, data, success_cb)
+    {
+        success_cb();
+    }
+
+    //trial preperation function
+    function prepare_trial(last_trial, step, options, condition, done){
+        console.log('We come in with this step: '+step);
+        var baseIndex = condition;
+        if (step != 0 && Math.abs(step) < 1)
+            step = Math.sign(step)*1;
+        var diff = Math.round(options.current_difference + step);
+        if (diff <= 0 && step != 0){
+            var dummy_trial = {
+                internal_node_id: jsPsych.currentTimelineNodeID(),
+                trial_type: 'audio-sequence-button-response',
+                step: -1,
+                difference: 0,
+                button_pressed: "1", 
+                i_correct: 0.5,
+                dummy: true  
+            };
+            jsPsych.data.get().push(dummy_trial);
+            diff = 1;
+            step = 1;
+            options.current_difference = 0;
+            options.current_step = -1;
+        }
+        console.log (jsPsych.currentTimelineNodeID().split('-'));
+        
+        // Fetch stimuli based on the adjusted difference
+        var trial_stimuli = stimuli[diff + baseIndex];
+        
+        // Randomly determine the correct response position
+        var i_correct = jsPsych.randomization.sampleWithoutReplacement([0,1], 1)[0];
+        if(i_correct==0)
+            trial_stimuli = [trial_stimuli, stimuli[baseIndex]];
+        else 
+            trial_stimuli = [stimuli[baseIndex], trial_stimuli];
+
+        options.current_step = step;
+        var new_trial = {
+            stimuli: trial_stimuli,
+            i_correct: i_correct,
+            trial_definition: {
+                dim: diff,
+                condition: condition,
+                stimuli: trial_stimuli
+            }, 
+            step: step,
+            difference: diff
+        };
+
+        console.log('We leave with this step: '+step);
+        done(new_trial);
+    }
+
+    //options for adaptive paradigm
+    var options = {
+        initial_step_size: 2,
+        starting_difference: 10,
+        step_size_modifier: 1.2,
+        down_up: [2, 1],
+        terminate_on_nturns: 8,
+        terminate_on_ntrials: 120,
+        terminate_on_max_difference: 41,
+        threshold_on_last_nturns: 6,
+        change_step_size_on_difference: 1,
+        change_step_size_on_ntrials: 4,
+        intervals: ['1', '2'],
+        prepare_trial: prepare_trial,
+        after_the_run: send_nAFC_data,
+        start_button: 'BAŞLAT',
+        prompt: "Hangi sesi çift duydunuz?",
+        opening_message: "<h1>Test</h1><p>Başlat düğmesine basarak asıl teste başlayabilirsiniz.</p>",
+        closing_message: null,
+        isi: 2000,
+        visual_feedback: true,
+    };
+
+    var main_timeline = [codeName, wellcome, sound_level, explanation1, practice1, explanation2, practice2];
+    
+    var conditions = [0];
+
+    for(c of conditions)
+        {
+            main_timeline.push(nAFC_adapt(options, c));
+        }
+        console.log(main_timeline)
+    
+    
+    jsPsych.init({
+        timeline: main_timeline,
+        show_progress_bar: false,
+        auto_update_progress_bar: false,
+        on_finish: function(data) {
+            var corrects = data.select('threshold').mean();
+            var roundedCorrects = (Math.round(corrects * 100) / 100).toFixed(2);
+            var id = jsPsych.data.get().filter({task_part: 'code_name'}).values()[0].response.isim;
+            jsPsych.data.addProperties({id: id});
+            var file_name = id + '_NNGIN.csv';
+            jsPsych.data.get().localSave('csv',file_name);
+            console.log ('<p>Boşluk tanıma değeriniz ' + roundedCorrects + ' milisaniye.</p>');
+        }
+    });
+  </script>
+  </body>
+</html>
